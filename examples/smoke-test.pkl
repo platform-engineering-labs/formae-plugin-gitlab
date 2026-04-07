@@ -1,0 +1,31 @@
+amends "@formae/forma.pkl"
+import "@formae/formae.pkl"
+import "@gitlab/gitlab.pkl"
+import "@gitlab/project/projectvariable.pkl" as projvar
+
+description {
+    text = "Smoke test: create a CI/CD variable on GitLab"
+    confirm = true
+}
+
+forma {
+    new formae.Stack {
+        label = "smoke-test"
+        description = "GitLab plugin smoke test"
+    }
+
+    new formae.Target {
+        label = "gitlab"
+        namespace = "GitLab"
+        config = new gitlab.Config {
+            group = "platform-engineering-labs1"
+            project = "formae-plugin-gitlab-test"
+        }
+    }
+
+    new projvar.Variable {
+        label = "test-var"
+        key = "FORMAE_SMOKE_TEST"
+        value = "hello-from-formae"
+    }
+}

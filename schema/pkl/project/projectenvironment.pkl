@@ -1,0 +1,50 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/// GitLab project deployment environment.
+module gitlab.project.projectenvironment
+
+import "@formae/formae.pkl"
+import "../gitlab.pkl"
+
+const type = "GitLab::Project::Environment"
+
+/// Environment tier options.
+typealias EnvironmentTier = "production"|"staging"|"testing"|"development"|"other"
+
+open class EnvironmentResolvable extends formae.Resolvable {
+    hidden type = module.type
+
+    hidden name: EnvironmentResolvable = (this) {
+        property = "name"
+    }
+}
+
+@gitlab.ResourceHint {
+    type = module.type
+    identifier = "name"
+}
+open class Environment extends formae.Resource {
+
+    /// Environment name.
+    @gitlab.FieldHint { required = true; createOnly = true }
+    name: String
+
+    /// External URL for the deployment environment.
+    @gitlab.FieldHint {}
+    externalUrl: String?
+
+    /// Environment tier.
+    @gitlab.FieldHint {}
+    tier: EnvironmentTier?
+
+    hidden parent = this
+
+    hidden res: EnvironmentResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

@@ -1,0 +1,23 @@
+/// Shared configuration for the infra-to-app example.
+module vars
+
+import "@formae/formae.pkl"
+import "@gitlab/gitlab.pkl"
+
+projectName = "infra-to-app"
+
+azureRegion = "westus"
+
+stack = new formae.Stack {
+    label = "infra-to-app"
+    description = "CI/CD infrastructure for Azure deployment via GitLab"
+}
+
+target = new formae.Target {
+    label = "gitlab"
+    namespace = "GitLab"
+    config = new gitlab.Config {
+        group = read("env:GITLAB_GROUP")
+        project = read("env:GITLAB_PROJECT")
+    }
+}

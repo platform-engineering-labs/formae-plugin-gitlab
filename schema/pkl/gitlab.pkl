@@ -1,0 +1,25 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/// GitLab CI/CD plugin base module.
+module gitlab
+
+import "@formae/formae.pkl"
+
+/// GitLab target configuration.
+open class Config {
+    hidden fixed type: String = "GitLab"
+    hidden group: String
+    hidden project: String?
+
+    fixed Type: String = type
+    fixed Group: String = group
+    fixed Project: String? = project
+}
+
+class FieldHint extends formae.FieldHint {}
+class ResourceHint extends formae.ResourceHint {}
+class SubResourceHint extends formae.SubResourceHint {}
