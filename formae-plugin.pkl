@@ -1,0 +1,14 @@
+/*
+ * Formae Plugin Manifest — GitLab
+ */
+
+name = "gitlab"
+version = "0.1.0"
+namespace = "GitLab"
+description = "GitLab CI/CD resource plugin for Formae"
+license = "FSL-1.1-ALv2"
+minFormaeVersion = "0.80.1"
+
+output {
+  renderer = new JsonRenderer {}
+}

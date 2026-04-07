@@ -1,0 +1,37 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+
+amends "@formae/forma.pkl"
+import "@formae/formae.pkl"
+
+import "@gitlab/gitlab.pkl"
+import "@gitlab/project/projectvariable.pkl" as projvar
+
+local stackName = "plugin-sdk-test-stack"
+local testRunID = read("env:FORMAE_TEST_RUN_ID")
+
+forma {
+  new formae.Stack {
+    label = stackName
+    description = "GitLab plugin conformance test stack"
+  }
+
+  new formae.Target {
+    label = "gitlab-target"
+    namespace = "GitLab"
+    config = new gitlab.Config {
+      group = read("env:GITLAB_TEST_GROUP")
+      project = read("env:GITLAB_TEST_PROJECT")
+    }
+  }
+
+  // Replace: change key (createOnly field triggers replacement)
+  new projvar.Variable {
+    label = "test-project-var"
+    key = "FORMAE_TEST_REPLACED_\(testRunID)"
+    value = "replaced-value"
+  }
+}

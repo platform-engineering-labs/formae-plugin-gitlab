@@ -1,0 +1,51 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+
+/// GitLab repository file.
+module gitlab.project.projectfile
+
+import "@formae/formae.pkl"
+import "../gitlab.pkl"
+
+const type = "GitLab::Project::File"
+
+open class FileResolvable extends formae.Resolvable {
+    hidden type = module.type
+
+    hidden path: FileResolvable = (this) {
+        property = "path"
+    }
+}
+
+@gitlab.ResourceHint {
+    type = module.type
+    identifier = "path"
+}
+open class File extends formae.Resource {
+
+    /// File path relative to repository root.
+    @gitlab.FieldHint { required = true; createOnly = true }
+    path: String
+
+    /// File content (plain text).
+    @gitlab.FieldHint { required = true }
+    content: String
+
+    /// Commit message for create/update operations.
+    @gitlab.FieldHint {}
+    commitMessage: String = "managed by formae"
+
+    /// Git branch to commit to. Defaults to the project's default branch.
+    @gitlab.FieldHint { createOnly = true }
+    branch: String?
+
+    hidden parent = this
+
+    hidden res: FileResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

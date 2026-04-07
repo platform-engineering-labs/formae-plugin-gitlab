@@ -1,0 +1,58 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+
+/// GitLab project CI/CD variable.
+module gitlab.project.projectvariable
+
+import "@formae/formae.pkl"
+import "../gitlab.pkl"
+
+const type = "GitLab::Project::Variable"
+
+open class VariableResolvable extends formae.Resolvable {
+    hidden type = module.type
+
+    hidden key: VariableResolvable = (this) {
+        property = "key"
+    }
+    hidden value: VariableResolvable = (this) {
+        property = "value"
+    }
+}
+
+@gitlab.ResourceHint {
+    type = module.type
+    identifier = "key"
+}
+open class Variable extends formae.Resource {
+
+    /// Variable key.
+    @gitlab.FieldHint { required = true; createOnly = true }
+    key: String
+
+    /// Variable value.
+    @gitlab.FieldHint { required = true }
+    value: String|formae.Resolvable
+
+    /// Whether variable is only exposed in protected branches/tags.
+    @gitlab.FieldHint {}
+    isProtected: Boolean = false
+
+    /// Whether variable value is masked in job logs.
+    @gitlab.FieldHint {}
+    masked: Boolean = false
+
+    /// Environment scope ("*" for all environments).
+    @gitlab.FieldHint { createOnly = true }
+    environmentScope: String = "*"
+
+    hidden parent = this
+
+    hidden res: VariableResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}
