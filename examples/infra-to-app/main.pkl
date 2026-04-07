@@ -2,8 +2,9 @@ amends "@formae/forma.pkl"
 
 import "@formae/formae.pkl"
 import "@gitlab/project/projectvariable.pkl" as projvar
-import "@gitlab/project/projectfile.pkl" as projfile
+import "@gitlab/project/projectpipeline.pkl" as pipeline
 import "@gitlab/project/projectenvironment.pkl" as projenv
+import "@gitlab/ci/pipeline.pkl" as CI
 
 import "vars.pkl"
 
@@ -86,141 +87,160 @@ local productionEnv = new projenv.Environment {
     tier = "production"
 }
 
-// --- Pipeline file ---
+// --- Typed CI/CD Pipeline ---
 
-local deployPipeline = new projfile.File {
+local deployPipeline = new pipeline.Pipeline {
     label = "deploy-pipeline"
     path = ".gitlab-ci.yml"
-    content = new Listing {
-        #"""
-        stages:
-          - provision
-          - deploy
-          - verify
-          - destroy
 
-        variables:
-          FORMAE_VERSION: "0.83.0"
+    stages = new { "provision"; "deploy"; "verify"; "destroy" }
 
-        .azure-login: &azure-login
-          - az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_TENANT_ID --tenant $AZURE_TENANT_ID
+    variables {
+        ["FORMAE_VERSION"] = "0.83.0"
+    }
 
-        provision:
-          stage: provision
-          image: mcr.microsoft.com/azure-cli:latest
-          rules:
-            - if: $CI_PIPELINE_SOURCE == "web" && $DEPLOY == "true"
-          script:
-            - curl -fsSL https://hub.platform.engineering/setup/formae.sh | bash -s -- -y
-            - export PATH=/opt/pel/formae/bin:$PATH
-            - az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
-            - pkl project resolve infra
-            - formae agent start &
-            - |
-              for i in $(seq 1 30); do
-                if formae plugin list 2>/dev/null | grep -q AZURE; then
-                  echo "Azure plugin ready"
-                  break
-                fi
-                sleep 2
-              done
-            - formae apply --mode reconcile --yes --watch infra/database.pkl
-          artifacts:
-            reports:
-              dotenv: deploy.env
-
-        deploy-app:
-          stage: deploy
-          image: mcr.microsoft.com/azure-cli:latest
-          needs: ["provision"]
-          rules:
-            - if: $CI_PIPELINE_SOURCE == "web" && $DEPLOY == "true"
-          script:
-            - az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
-            - |
-              az container create \
-                --resource-group ${PROJECT_NAME}-rg \
-                --name miniflux-demo \
-                --dns-name-label ${PROJECT_NAME} \
-                --image formaedemoacr.azurecr.io/miniflux:2.2.19 \
-                --registry-login-server formaedemoacr.azurecr.io \
-                --registry-username formaedemoacr \
-                --registry-password "$ACR_PASSWORD" \
-                --os-type Linux --cpu 1 --memory 1 --ports 8080 \
-                --ip-address Public \
-                --environment-variables \
-                  DATABASE_URL="postgres://pgadmin:${POSTGRES_PASSWORD}@${PROJECT_NAME}-pg.postgres.database.azure.com:5432/miniflux?sslmode=require" \
-                  RUN_MIGRATIONS=1 CREATE_ADMIN=1 \
-                  ADMIN_USERNAME=admin ADMIN_PASSWORD=demo1234 \
-                  LISTEN_ADDR=0.0.0.0:8080
-            - APP_FQDN=$(az container show --resource-group ${PROJECT_NAME}-rg --name miniflux-demo --query 'ipAddress.fqdn' -o tsv)
-            - echo "APP_URL=http://$APP_FQDN:8080" >> deploy.env
-          artifacts:
-            reports:
-              dotenv: deploy.env
-
-        verify:
-          stage: verify
-          image: curlimages/curl:latest
-          needs: ["deploy-app"]
-          rules:
-            - if: $CI_PIPELINE_SOURCE == "web" && $DEPLOY == "true"
-          script:
-            - |
-              for i in $(seq 1 60); do
-                if curl -sf "$APP_URL/healthcheck" > /dev/null 2>&1; then
-                  echo "Miniflux is ready"
-                  break
-                fi
-                echo "Waiting... ($i/60)"
-                sleep 2
-              done
-            - |
-              for feed in \
-                "https://hnrss.org/best" \
-                "https://thenewstack.io/feed/" \
-                "https://tldr.tech/api/rss/devops" \
-                "https://hackernoon.com/feed" \
-                "https://xkcd.com/rss.xml"; do
-                for attempt in $(seq 1 5); do
-                  if curl -sf -X POST "$APP_URL/v1/feeds" \
-                    -u admin:demo1234 \
-                    -H "Content-Type: application/json" \
-                    -d "{\"feed_url\": \"$feed\", \"category_id\": 1}"; then
+    jobs {
+        ["provision"] = new CI.Job {
+            stage = "provision"
+            image = "mcr.microsoft.com/azure-cli:latest"
+            rules = new {
+                new CI.Rule {
+                    `if` = #"$CI_PIPELINE_SOURCE == "web" && $DEPLOY == "true""#
+                }
+            }
+            script = new {
+                #"curl -fsSL https://hub.platform.engineering/setup/formae.sh | bash -s -- -y"#
+                "export PATH=/opt/pel/formae/bin:$PATH"
+                #"az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID"#
+                "pkl project resolve infra"
+                """
+                formae agent start &
+                for i in $(seq 1 30); do
+                  if formae plugin list 2>/dev/null | grep -q AZURE; then
+                    echo "Azure plugin ready"
                     break
                   fi
-                  echo "Retrying feed $feed ($attempt/5)..."
-                  sleep 3
+                  sleep 2
                 done
-              done
-            - curl -sf -X PUT "$APP_URL/v1/feeds/refresh" -u admin:demo1234
-            - FEED_COUNT=$(curl -sf "$APP_URL/v1/feeds" -u admin:demo1234 | jq 'length')
-            - echo "Feed count:$FEED_COUNT"
-            - '[ "$FEED_COUNT" -eq 5 ] || exit 1'
-
-        destroy:
-          stage: destroy
-          image: mcr.microsoft.com/azure-cli:latest
-          rules:
-            - if: $CI_PIPELINE_SOURCE == "web" && $DESTROY == "true"
-          script:
-            - az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
-            - az container delete --resource-group ${PROJECT_NAME}-rg --name miniflux-demo --yes || true
-            - curl -fsSL https://hub.platform.engineering/setup/formae.sh | bash -s -- -y
-            - export PATH=/opt/pel/formae/bin:$PATH
-            - pkl project resolve infra
-            - formae agent start &
-            - |
-              for i in $(seq 1 30); do
-                if formae plugin list 2>/dev/null | grep -q AZURE; then
-                  echo "Azure plugin ready"
-                  break
-                fi
-                sleep 2
-              done
-            - formae destroy --yes --watch infra/database.pkl
-        """#
-    }.join("")
+                """
+                "formae apply --mode reconcile --yes --watch infra/database.pkl"
+            }
+            artifacts = new CI.Artifacts {
+                reports = new CI.Reports {
+                    dotenv = "deploy.env"
+                }
+            }
+        }
+        ["deploy-app"] = new CI.Job {
+            stage = "deploy"
+            image = "mcr.microsoft.com/azure-cli:latest"
+            needs = new { "provision" }
+            rules = new {
+                new CI.Rule {
+                    `if` = #"$CI_PIPELINE_SOURCE == "web" && $DEPLOY == "true""#
+                }
+            }
+            script = new {
+                #"az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID"#
+                #"""
+                az container create \
+                  --resource-group ${PROJECT_NAME}-rg \
+                  --name miniflux-demo \
+                  --dns-name-label ${PROJECT_NAME} \
+                  --image formaedemoacr.azurecr.io/miniflux:2.2.19 \
+                  --registry-login-server formaedemoacr.azurecr.io \
+                  --registry-username formaedemoacr \
+                  --registry-password "$ACR_PASSWORD" \
+                  --os-type Linux --cpu 1 --memory 1 --ports 8080 \
+                  --ip-address Public \
+                  --environment-variables \
+                    DATABASE_URL="postgres://pgadmin:${POSTGRES_PASSWORD}@${PROJECT_NAME}-pg.postgres.database.azure.com:5432/miniflux?sslmode=require" \
+                    RUN_MIGRATIONS=1 CREATE_ADMIN=1 \
+                    ADMIN_USERNAME=admin ADMIN_PASSWORD=demo1234 \
+                    LISTEN_ADDR=0.0.0.0:8080
+                """#
+                #"APP_FQDN=$(az container show --resource-group ${PROJECT_NAME}-rg --name miniflux-demo --query 'ipAddress.fqdn' -o tsv)"#
+                #"echo "APP_URL=http://$APP_FQDN:8080" >> deploy.env"#
+            }
+            artifacts = new CI.Artifacts {
+                reports = new CI.Reports {
+                    dotenv = "deploy.env"
+                }
+            }
+        }
+        ["verify"] = new CI.Job {
+            stage = "verify"
+            image = "curlimages/curl:latest"
+            needs = new { "deploy-app" }
+            rules = new {
+                new CI.Rule {
+                    `if` = #"$CI_PIPELINE_SOURCE == "web" && $DEPLOY == "true""#
+                }
+            }
+            script = new {
+                """
+                for i in $(seq 1 60); do
+                  if curl -sf "$APP_URL/healthcheck" > /dev/null 2>&1; then
+                    echo "Miniflux is ready"
+                    break
+                  fi
+                  echo "Waiting... ($i/60)"
+                  sleep 2
+                done
+                """
+                #"""
+                for feed in \
+                  "https://hnrss.org/best" \
+                  "https://thenewstack.io/feed/" \
+                  "https://tldr.tech/api/rss/devops" \
+                  "https://hackernoon.com/feed" \
+                  "https://xkcd.com/rss.xml"; do
+                  for attempt in $(seq 1 5); do
+                    if curl -sf -X POST "$APP_URL/v1/feeds" \
+                      -u admin:demo1234 \
+                      -H "Content-Type: application/json" \
+                      -d "{\"feed_url\": \"$feed\", \"category_id\": 1}"; then
+                      break
+                    fi
+                    echo "Retrying feed $feed ($attempt/5)..."
+                    sleep 3
+                  done
+                done
+                """#
+                #"curl -sf -X PUT "$APP_URL/v1/feeds/refresh" -u admin:demo1234"#
+                #"FEED_COUNT=$(curl -sf "$APP_URL/v1/feeds" -u admin:demo1234 | jq 'length')"#
+                #"echo "Feed count: $FEED_COUNT""#
+                #"[ "$FEED_COUNT" -eq 5 ] || exit 1"#
+            }
+        }
+        ["destroy"] = new CI.Job {
+            stage = "destroy"
+            image = "mcr.microsoft.com/azure-cli:latest"
+            rules = new {
+                new CI.Rule {
+                    `if` = #"$CI_PIPELINE_SOURCE == "web" && $DESTROY == "true""#
+                }
+            }
+            script = new {
+                #"az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID"#
+                #"az container delete --resource-group ${PROJECT_NAME}-rg --name miniflux-demo --yes || true"#
+                #"curl -fsSL https://hub.platform.engineering/setup/formae.sh | bash -s -- -y"#
+                "export PATH=/opt/pel/formae/bin:$PATH"
+                "pkl project resolve infra"
+                """
+                formae agent start &
+                for i in $(seq 1 30); do
+                  if formae plugin list 2>/dev/null | grep -q AZURE; then
+                    echo "Azure plugin ready"
+                    break
+                  fi
+                  sleep 2
+                done
+                formae destroy --yes --watch infra/database.pkl
+                """
+            }
+        }
+    }
 }
 
 forma {

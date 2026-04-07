@@ -1,0 +1,306 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+
+/// Typed GitLab CI/CD pipeline schema.
+/// Models the structure of .gitlab-ci.yml with type-safe Pkl classes.
+module gitlab.ci.pipeline
+
+/// A single CI/CD job.
+open class Job {
+    /// Shell commands to execute.
+    script: Listing<String>?
+
+    /// Commands to run before the main script.
+    before_script: Listing<String>?
+
+    /// Commands to run after the main script (regardless of success/failure).
+    after_script: Listing<String>?
+
+    /// Stage this job belongs to.
+    stage: String?
+
+    /// Docker image to use.
+    image: (String|Image)?
+
+    /// Additional Docker services.
+    services: Listing<String|Service>?
+
+    /// Job-level variables.
+    variables: Mapping<String, String>?
+
+    /// Rules that control when the job runs.
+    rules: Listing<Rule>?
+
+    /// Job dependencies (DAG mode).
+    needs: Listing<String|Need>?
+
+    /// Artifact configuration.
+    artifacts: Artifacts?
+
+    /// Cache configuration.
+    cache: (Cache|Listing<Cache>)?
+
+    /// Environment to deploy to.
+    environment: (String|Environment)?
+
+    /// Runner tags.
+    tags: Listing<String>?
+
+    /// Timeout for the job.
+    `timeout`: String?
+
+    /// Retry configuration.
+    retry: (Int|Retry)?
+
+    /// Whether to allow failure.
+    allow_failure: (Boolean|AllowFailure)?
+
+    /// When to run: on_success, on_failure, always, manual, delayed.
+    `when`: String?
+
+    /// Resource group for mutual exclusion.
+    resource_group: String?
+
+    /// Trigger downstream pipelines.
+    trigger: (String|Trigger)?
+
+    /// Parallel job configuration.
+    parallel: (Int|Parallel)?
+
+    /// Interruptible flag.
+    interruptible: Boolean?
+
+    /// Job timeout in minutes.
+    `timeout-minutes`: Number?
+
+    /// Coverage regex.
+    coverage: String?
+
+    /// Release configuration.
+    release: Release?
+
+    /// Secret variables from vault.
+    secrets: Mapping<String, Secret>?
+}
+
+/// Docker image configuration.
+open class Image {
+    name: String
+    entrypoint: Listing<String>?
+    pull_policy: (String|Listing<String>)?
+}
+
+/// Docker service configuration.
+open class Service {
+    name: String
+    alias: String?
+    entrypoint: Listing<String>?
+    command: Listing<String>?
+    variables: Mapping<String, String>?
+}
+
+/// Rule for conditional job execution.
+open class Rule {
+    /// CI/CD variable expression.
+    `if`: String?
+
+    /// File change patterns.
+    changes: (Listing<String>|Changes)?
+
+    /// Check if files exist.
+    exists: Listing<String>?
+
+    /// When to run: on_success, on_failure, always, manual, delayed, never.
+    `when`: String?
+
+    /// Allow failure for this rule.
+    allow_failure: Boolean?
+
+    /// Variables to set when rule matches.
+    variables: Mapping<String, String>?
+
+    /// Needs override when rule matches.
+    needs: Listing<String|Need>?
+}
+
+/// Changes configuration for rules.
+open class Changes {
+    paths: Listing<String>
+    compare_to: String?
+}
+
+/// Job dependency (DAG).
+open class Need {
+    job: String
+    artifacts: Boolean?
+    optional: Boolean?
+    pipeline: String?
+}
+
+/// Artifact configuration.
+open class Artifacts {
+    paths: Listing<String>?
+    exclude: Listing<String>?
+    expire_in: String?
+    expose_as: String?
+    name: String?
+    untracked: Boolean?
+    `when`: String?
+    reports: Reports?
+}
+
+/// Artifact reports.
+open class Reports {
+    junit: (String|Listing<String>)?
+    coverage_report: CoverageReport?
+    codequality: (String|Listing<String>)?
+    sast: (String|Listing<String>)?
+    dotenv: (String|Listing<String>)?
+    terraform: (String|Listing<String>)?
+}
+
+/// Coverage report configuration.
+open class CoverageReport {
+    coverage_format: String
+    path: String
+}
+
+/// Cache configuration.
+open class Cache {
+    key: (String|CacheKey)?
+    paths: Listing<String>?
+    untracked: Boolean?
+    `when`: String?
+    policy: String?
+    fallback_keys: Listing<String>?
+}
+
+/// Cache key configuration.
+open class CacheKey {
+    files: Listing<String>?
+    prefix: String?
+}
+
+/// Environment configuration.
+open class Environment {
+    name: String
+    url: String?
+    on_stop: String?
+    action: String?
+    auto_stop_in: String?
+    kubernetes: Mapping<String, String>?
+    deployment_tier: String?
+}
+
+/// Retry configuration.
+open class Retry {
+    max: Int?
+    `when`: (String|Listing<String>)?
+}
+
+/// Allow failure configuration.
+open class AllowFailure {
+    exit_codes: (Int|Listing<Int>)?
+}
+
+/// Trigger configuration for downstream pipelines.
+open class Trigger {
+    project: String?
+    branch: String?
+    strategy: String?
+    include: (String|Listing<TriggerInclude>)?
+}
+
+/// Trigger include configuration.
+open class TriggerInclude {
+    `local`: String?
+    artifact: String?
+    job: String?
+    project: String?
+    ref: String?
+    file: (String|Listing<String>)?
+}
+
+/// Parallel job configuration.
+open class Parallel {
+    matrix: Listing<Mapping<String, Listing<String>>>?
+}
+
+/// Release configuration.
+open class Release {
+    tag_name: String
+    tag_message: String?
+    name: String?
+    description: String?
+    ref: String?
+    milestones: Listing<String>?
+    released_at: String?
+    assets: ReleaseAssets?
+}
+
+/// Release assets.
+open class ReleaseAssets {
+    links: Listing<ReleaseLink>?
+}
+
+/// Release asset link.
+open class ReleaseLink {
+    name: String
+    url: String
+    filepath: String?
+    link_type: String?
+}
+
+/// Secret from external vault.
+open class Secret {
+    vault: (String|VaultConfig)?
+    token: String?
+}
+
+/// Vault configuration for secrets.
+open class VaultConfig {
+    engine: VaultEngine?
+    path: String?
+    field: String?
+}
+
+/// Vault engine configuration.
+open class VaultEngine {
+    name: String
+    path: String
+}
+
+/// Workflow rules controlling when pipelines are created.
+open class WorkflowRules {
+    rules: Listing<Rule>?
+    name: String?
+}
+
+/// Include configuration.
+open class Include {
+    `local`: String?
+    remote: String?
+    project: String?
+    ref: String?
+    file: (String|Listing<String>)?
+    template: String?
+    component: String?
+    rules: Listing<Rule>?
+}
+
+/// Default job settings.
+open class Default {
+    image: (String|Image)?
+    services: Listing<String|Service>?
+    before_script: Listing<String>?
+    after_script: Listing<String>?
+    tags: Listing<String>?
+    cache: (Cache|Listing<Cache>)?
+    artifacts: Artifacts?
+    retry: (Int|Retry)?
+    `timeout`: String?
+    interruptible: Boolean?
+}

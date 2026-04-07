@@ -1,0 +1,64 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+
+/// GitLab CI/CD pipeline file (typed .gitlab-ci.yml).
+module gitlab.project.projectpipeline
+
+import "@formae/formae.pkl"
+import "../gitlab.pkl"
+import "../ci/pipeline.pkl" as CI
+
+const type = "GitLab::Project::Pipeline"
+
+open class PipelineResolvable extends formae.Resolvable {
+    hidden type = module.type
+
+    hidden path: PipelineResolvable = (this) {
+        property = "path"
+    }
+}
+
+@gitlab.ResourceHint {
+    type = module.type
+    identifier = "path"
+}
+open class Pipeline extends formae.Resource {
+
+    /// File path for the pipeline YAML. Defaults to .gitlab-ci.yml.
+    @gitlab.FieldHint { required = true; createOnly = true }
+    path: String = ".gitlab-ci.yml"
+
+    /// Pipeline stages in execution order.
+    @gitlab.FieldHint {}
+    stages: Listing<String>?
+
+    /// Global variables available to all jobs.
+    @gitlab.FieldHint {}
+    variables: Mapping<String, String>?
+
+    /// Workflow rules controlling when pipelines are created.
+    @gitlab.FieldHint {}
+    workflow: CI.WorkflowRules?
+
+    /// Default settings applied to all jobs.
+    @gitlab.FieldHint {}
+    default: CI.Default?
+
+    /// Include other CI config files/templates.
+    @gitlab.FieldHint {}
+    include: Listing<CI.Include>?
+
+    /// Job definitions keyed by job name.
+    @gitlab.FieldHint {}
+    jobs: Mapping<String, CI.Job>?
+
+    hidden parent = this
+
+    hidden res: PipelineResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}
