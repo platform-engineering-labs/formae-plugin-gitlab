@@ -1,5 +1,5 @@
-github.com/JeroenSoeters/actor/statemachine v0.0.0-20260205190926-8b1b2eaf30f4 h1:JdoPbqQSv9iDCfkBFH5wDZCNpYHgJJVsrD7Xg0Jp57o=
-github.com/JeroenSoeters/actor/statemachine v0.0.0-20260205190926-8b1b2eaf30f4/go.mod h1:XbiEudzYCbg5YvbIMqylWXH2iWnUeKagDTfPR7uOaqg=
+github.com/JeroenSoeters/actor/statemachine v0.0.0-20260319024748-85c28f9f660b h1:HBny9tCyJDRftwBjIYPO2cHJu2faBhmyfvFMeGda/cU=
+github.com/JeroenSoeters/actor/statemachine v0.0.0-20260319024748-85c28f9f660b/go.mod h1:pZkasfR9a9QIG3HbjvI5dDZpv07YQFgYXiXqCctIrmg=
 github.com/JeroenSoeters/ergo v1.999.320-pel.1 h1:f+FhIqLSeK81oArXJ9QkaOhHjahyW9Ec0T50xlGVxI4=
 github.com/JeroenSoeters/ergo v1.999.320-pel.1/go.mod h1:bLQ6PoO6Mz/8gVuzvPv3xfMfo1P9w6rZV1WnMXMeMdg=
 github.com/Masterminds/semver v1.5.0 h1:H65muMkzWKEuNDnfl9d70GUjFniHKHRbFPGBuZ3QEww=
@@ -55,10 +55,10 @@ github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxec
 github.com/mattn/go-colorable v0.1.13/go.mod h1:7S9/ev0klgBDR4GtXTXX8a3vIGJpMovkB8vQcUbaXHg=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
-github.com/platform-engineering-labs/formae/pkg/api/model v0.1.1 h1:ZMTgKwSomy2cVcl/+NivSqopbWeHbmYeQ+BxoYq8bVY=
-github.com/platform-engineering-labs/formae/pkg/api/model v0.1.1/go.mod h1:0ncHFCsGA6b0w1kBm6m+QwJ823qAY2vL47GvoR0BTyU=
-github.com/platform-engineering-labs/formae/pkg/model v0.1.6 h1:5Ao8Kog2tpTD4Om7hs07QB0tKwwUejuLku9Gv5C8pF8=
-github.com/platform-engineering-labs/formae/pkg/model v0.1.6/go.mod h1:XmGJA7jNPX9cEGc8TxTiEDitBuEVJOddNakdTZ/bH4U=
+github.com/platform-engineering-labs/formae/pkg/api/model v0.1.2-0.20260415202653-93e985c32538 h1:p3U16gy/PUaqg+DJQrcWCtntOuO7cF0/GBpw4Y4G21Y=
+github.com/platform-engineering-labs/formae/pkg/api/model v0.1.2-0.20260415202653-93e985c32538/go.mod h1:AgwZNARQLq0kLvF2YoWAdylniK+t/++qOdCRPLS8ykg=
+github.com/platform-engineering-labs/formae/pkg/model v0.1.24-0.20260415202653-93e985c32538 h1:d3UYgLOY3adG1RP36iS2RolN7bNJyTm29+6ShLNq9vw=
+github.com/platform-engineering-labs/formae/pkg/model v0.1.24-0.20260415202653-93e985c32538/go.mod h1:1dmsFwoaJZkHevBsAIZr068CWzG7de1VNz7PFWvM3Z8=
 github.com/platform-engineering-labs/formae/pkg/plugin v0.1.22 h1:joHgX9GjUKP0EIwLAka4+v9ukzzkqr+PLpMF28BOKRo=
 github.com/platform-engineering-labs/formae/pkg/plugin v0.1.22/go.mod h1:RlZ7kQLDEDU6yuqT1jveD+odicnKFpv3pLQZr6S+sEw=
 github.com/platform-engineering-labs/formae/pkg/plugin-conformance-tests v0.1.42 h1:EdxMbtUEt93StlvACmw4lOUrqdEVEOjZ4uhNyI5UKPE=

@@ -1,6 +1,6 @@
 module github.com/platform-engineering-labs/formae-plugin-gitlab
 
-go 1.25
+go 1.26
 
 require (
 	github.com/goccy/go-yaml v1.19.2
@@ -27,8 +27,8 @@ require (
 	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/lufia/plan9stats v0.0.0-20251013123823-9fd1530e3ec3 // indirect
 	github.com/masterminds/semver v1.5.0 // indirect
-	github.com/platform-engineering-labs/formae/pkg/api/model v0.1.1 // indirect
-	github.com/platform-engineering-labs/formae/pkg/model v0.1.6 // indirect
+	github.com/platform-engineering-labs/formae/pkg/api/model v0.1.2-0.20260415202653-93e985c32538 // indirect
+	github.com/platform-engineering-labs/formae/pkg/model v0.1.24-0.20260415202653-93e985c32538 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.1 // indirect
 	github.com/theory/jsonpath v0.10.2 // indirect
@@ -65,4 +65,4 @@ require (
 
 replace ergo.services/ergo => github.com/JeroenSoeters/ergo v1.999.320-pel.1
 
-replace ergo.services/actor/statemachine => github.com/JeroenSoeters/actor/statemachine v0.0.0-20260205190926-8b1b2eaf30f4
+replace ergo.services/actor/statemachine => github.com/JeroenSoeters/actor/statemachine v0.0.0-20260319024748-85c28f9f660b
