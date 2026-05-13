@@ -9,6 +9,7 @@
  */
 
 name = "gitlab"
+// Placeholder. The hub-build pipeline overwrites this from the release tag at publish time.
 version = "0.1.0"
 namespace = "GitLab"
 description = "GitLab CI/CD resource plugin for Formae"
