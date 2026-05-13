@@ -12,12 +12,16 @@ BINARY := $(PLUGIN_NAME)
 PLUGIN_BASE_DIR := $(HOME)/.pel/formae/plugins
 INSTALL_DIR := $(PLUGIN_BASE_DIR)/$(PLUGIN_NAME)/v$(PLUGIN_VERSION)
 
-.PHONY: all build test test-unit test-integration lint verify-schema gen-pkl clean install install-dev help clean-environment conformance-test conformance-test-crud conformance-test-discovery
+.PHONY: all build test test-unit test-integration lint lint-reuse add-license schema-version verify-schema gen-pkl clean install install-dev help clean-environment conformance-test conformance-test-crud conformance-test-discovery
 
 all: build
 
+## schema-version: Write schema/pkl/VERSION from the plugin manifest
+schema-version:
+	@mkdir -p schema/pkl && echo "$(PLUGIN_VERSION)" > schema/pkl/VERSION
+
 ## build: Build the plugin binary
-build:
+build: schema-version
 	$(GO) build $(GOFLAGS) -o bin/$(BINARY) .
 
 ## test: Run all tests
@@ -36,8 +40,16 @@ test-integration:
 lint:
 	golangci-lint run
 
+## lint-reuse: Check REUSE license compliance
+lint-reuse:
+	./scripts/lint_reuse.sh
+
+## add-license: Add license headers to source files (idempotent)
+add-license:
+	./scripts/add_license.sh
+
 ## verify-schema: Validate Pkl schema files
-verify-schema:
+verify-schema: schema-version
 	$(GO) run github.com/platform-engineering-labs/formae/pkg/plugin/testutil/cmd/verify-schema --namespace $(PLUGIN_NAMESPACE) ./schema/pkl
 
 ## gen-pkl: Resolve all Pkl project dependencies

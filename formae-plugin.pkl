@@ -1,11 +1,19 @@
 /*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+
+/*
  * Formae Plugin Manifest — GitLab
  */
 
 name = "gitlab"
+// Placeholder. The hub-build pipeline overwrites this from the release tag at publish time.
 version = "0.1.0"
 namespace = "GitLab"
 description = "GitLab CI/CD resource plugin for Formae"
+category = "cicd"
 license = "FSL-1.1-ALv2"
 minFormaeVersion = "0.84.0"
 

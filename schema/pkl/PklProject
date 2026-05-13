@@ -2,13 +2,13 @@ amends "pkl:Project"
 
 package {
   name = "gitlab"
-  baseUri = "package://hub.platform.engineering/plugins/gitlab/schema/pkl/gitlab"
-  version = "0.1.0"
-  packageZipUrl = "https://hub.platform.engineering/plugins/gitlab/schema/pkl/gitlab@\(version).zip"
+  baseUri = "package://hub.platform.engineering/plugins/gitlab/schema/pkl/\(name)/\(name)"
+  version = read("VERSION").text.trim()
+  packageZipUrl = "https://hub.platform.engineering/plugins/gitlab/schema/pkl/\(name)/\(name)@\(version).zip"
 }
 
 dependencies {
   ["formae"] {
-    uri = "package://hub.platform.engineering/plugins/pkl/schema/pkl/formae/formae@0.84.0"
+    uri = "package://hub.platform.engineering/plugins/pkl/schema/pkl/formae/formae@0.85.0"
   }
 }
