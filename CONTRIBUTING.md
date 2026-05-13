@@ -4,45 +4,62 @@ This document covers local development for plugin authors. For user-facing
 plugin docs (configuration, supported resources, examples), see
 [README.md](README.md).
 
+## Prerequisites
+
+- Go 1.25+
+- [Pkl CLI](https://pkl-lang.org/main/current/pkl-cli/index.html) 0.30+
+- GitLab access token (for integration/conformance testing)
+
 ## Local Installation
 
 ```bash
+# Install the plugin
 make install
 ```
 
-## Building & Testing
+## Building
 
 ```bash
-make build          # Build plugin
-make test           # Run tests
-make lint           # Run golangci-lint
-make install        # Install locally
-make install-dev    # Install as v0.0.0 (for debug builds)
-make gen-pkl        # Resolve PKL dependencies
-make verify-schema  # Validate Pkl schemas
+make build      # Build plugin binary
+make test-unit  # Run unit tests
+make lint       # Run linter
+make install    # Build + install locally
 ```
 
-## Conformance Tests
-
-Run against a real GitLab project:
+## Local Testing
 
 ```bash
-export GITLAB_TOKEN=glpat-...
-export GITLAB_TEST_GROUP=my-group
-export GITLAB_TEST_PROJECT=my-test-project
+# Install plugin locally
+make install
+
+# Start formae agent
+formae agent start
+
+# Apply example resources
+formae apply --mode reconcile --watch examples/basic/main.pkl
+```
+
+## Credentials Setup for Testing
+
+Integration and conformance tests require a GitLab access token plus a test
+group/project:
+
+```bash
+export GITLAB_TOKEN=...           # PAT with api scope
+export GITLAB_TEST_GROUP=...      # group used for test resources
+export GITLAB_TEST_PROJECT=...    # project used for test resources
+
+# Run conformance tests
 make conformance-test
 ```
 
-To run conformance against a local formae build (e.g. an unreleased version),
-point the harness at the binary:
+## Conformance Testing
+
+Run the full CRUD lifecycle + discovery tests:
 
 ```bash
-export FORMAE_BINARY=/path/to/formae
-make conformance-test
+make conformance-test  # Latest formae version
 ```
 
-## Clean Environment
-
-```bash
-GITLAB_TEST_GROUP=my-group GITLAB_TEST_PROJECT=my-test-project ./scripts/ci/clean-environment.sh
-```
+The `scripts/ci/clean-environment.sh` script cleans up test resources. It runs
+before and after conformance tests and is idempotent.
