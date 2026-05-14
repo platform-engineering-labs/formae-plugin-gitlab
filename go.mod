@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/goccy/go-yaml v1.19.2
 	github.com/platform-engineering-labs/formae/pkg/model v0.1.24-0.20260415202653-93e985c32538
-	github.com/platform-engineering-labs/formae/pkg/plugin v0.2.0
+	github.com/platform-engineering-labs/formae/pkg/plugin v0.2.2
 	github.com/platform-engineering-labs/formae/pkg/plugin-conformance-tests v0.2.4
 	gitlab.com/gitlab-org/api/client-go v1.46.0
 )
