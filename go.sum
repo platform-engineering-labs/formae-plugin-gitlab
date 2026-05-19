@@ -119,8 +119,8 @@ github.com/naegelejd/go-acl v0.0.0-20260323030528-42e4d61407df h1:1xWk/De6cs3h2r
 github.com/naegelejd/go-acl v0.0.0-20260323030528-42e4d61407df/go.mod h1:sTJHuiEPB0WNdPYPOP9M6FQU4YTHemXgDLIQqkbBdDI=
 github.com/platform-engineering-labs/formae/pkg/api/model v0.1.2-0.20260415202653-93e985c32538 h1:p3U16gy/PUaqg+DJQrcWCtntOuO7cF0/GBpw4Y4G21Y=
 github.com/platform-engineering-labs/formae/pkg/api/model v0.1.2-0.20260415202653-93e985c32538/go.mod h1:AgwZNARQLq0kLvF2YoWAdylniK+t/++qOdCRPLS8ykg=
-github.com/platform-engineering-labs/formae/pkg/model v0.1.24-0.20260415202653-93e985c32538 h1:d3UYgLOY3adG1RP36iS2RolN7bNJyTm29+6ShLNq9vw=
-github.com/platform-engineering-labs/formae/pkg/model v0.1.24-0.20260415202653-93e985c32538/go.mod h1:1dmsFwoaJZkHevBsAIZr068CWzG7de1VNz7PFWvM3Z8=
+github.com/platform-engineering-labs/formae/pkg/model v0.1.24 h1:FZH3m0zlkXSJMYRy23jZrJPdYv1+6yOxCS5NDHAjNQU=
+github.com/platform-engineering-labs/formae/pkg/model v0.1.24/go.mod h1:1dmsFwoaJZkHevBsAIZr068CWzG7de1VNz7PFWvM3Z8=
 github.com/platform-engineering-labs/formae/pkg/plugin v0.2.0 h1:jK5XB/+SXH6BwwJKgR6vh45vTHi/JAuf5CZMtvxln4A=
 github.com/platform-engineering-labs/formae/pkg/plugin v0.2.0/go.mod h1:78S5dbEGcJnOTifi/2pnHNw0JEGTD9x6eYWsntkWBFo=
 github.com/platform-engineering-labs/formae/pkg/plugin-conformance-tests v0.2.4 h1:7Ww45TQ3sNNQVwMiEMPKles+HCXZLJRSVjgMJZMj0sQ=
