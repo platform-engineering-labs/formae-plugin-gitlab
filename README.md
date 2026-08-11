@@ -29,9 +29,42 @@ new formae.Target {
 }
 ```
 
-Authentication uses the following chain (in order):
+### Authentication
+
+The API token can come from the target config, which is the recommended form
+because the field accepts a resolvable and can therefore be sourced from a
+formae-managed secret. The agent resolves it live before every call, so
+onboarding or rotating a token needs no agent restart:
+
+```pkl
+config = new gitlab.Config {
+    group = "my-group"
+    project = "my-project"
+    token = gitlabToken.res.secretValue
+}
+```
+
+A declared token is used as given: one that resolves to an empty value is an
+error rather than a silent fall back, which would otherwise authenticate as
+whoever the ambient chain happens to name.
+
+Omit `token` to use the ambient chain instead, in order:
+
 - `GITLAB_TOKEN` environment variable
 - `glab` CLI config file (`~/Library/Application Support/glab-cli/config.yml` or `~/.config/glab-cli/config.yml`)
+
+### Variable values are secrets
+
+`GitLab::Project::Variable.value` is opaque. GitLab returns variable values on
+read, so formae stores the value hashed and redacts it in output, whether it was
+supplied as a literal, as `formae.value(...).opaque`, or resolved from another
+resource. This applies to every variable, including ones holding ordinary
+configuration: their values are not readable back out of formae, and an
+out-of-band change is reported as drift but cannot be absorbed into code as a
+readable value.
+
+Other resources reference a variable's value with `myVariable.res.secretValue`,
+which resolves live and is stored as a reference rather than a copy.
 
 ## Examples
 
