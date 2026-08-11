@@ -10,14 +10,36 @@ module gitlab
 import "@formae/formae.pkl"
 
 /// GitLab target configuration.
+///
+/// The API token can be supplied in two ways:
+///   1. Via the `token` field (recommended), which accepts a resolvable and so
+///      can be sourced from a formae-managed secret:
+///        token = gitlabToken.res.secretValue
+///   2. Via the ambient credential chain, used when `token` is absent:
+///      GITLAB_TOKEN, then the glab CLI configuration file.
 open class Config {
     hidden fixed type: String = "GitLab"
     hidden group: String
     hidden project: String?
 
+    /// The GitLab API token. Accepts a literal string or a resolvable (e.g.
+    /// sourced from a formae-managed secret, which the agent resolves live on
+    /// every call, so rotating it needs no agent restart).
+    ///
+    /// When set it is used as given: a token that resolves to an empty value is
+    /// an error rather than a silent fall back to the ambient chain, which would
+    /// authenticate as whoever that chain happens to name. Omit the field to use
+    /// the ambient chain deliberately.
+    ///
+    /// Mutable: how the agent authenticates is not where the resources live, so
+    /// rotating the token updates the target rather than replacing it.
+    @formae.ConfigFieldHint { createOnly = false }
+    hidden token: (String|formae.Resolvable)?
+
     fixed Type: String = type
     fixed Group: String = group
     fixed Project: String? = project
+    fixed Token: (String|formae.Resolvable)? = token
 }
 
 class FieldHint extends formae.FieldHint {}

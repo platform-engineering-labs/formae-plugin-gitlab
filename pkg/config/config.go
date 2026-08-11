@@ -17,7 +17,16 @@ import (
 type Config struct {
 	Group   string `json:"Group"`
 	Project string `json:"Project,omitempty"`
-	Token   string `json:"-"`
+
+	// DeclaredToken is the target config's token field. It may originate from a
+	// formae-managed secret, which the agent resolves live before every plugin
+	// call, so rotating or onboarding a token needs no agent restart. A pointer
+	// so a declared-but-empty token is distinguishable from an absent one.
+	DeclaredToken *string `json:"Token,omitempty"`
+
+	// Token is the credential the plugin authenticates with, resolved from the
+	// target config or the ambient chain. Never part of the wire shape.
+	Token string `json:"-"`
 }
 
 // ProjectPath returns the full "group/project" path used by GitLab APIs.
@@ -25,8 +34,12 @@ func (c *Config) ProjectPath() string {
 	return c.Group + "/" + c.Project
 }
 
-// FromTargetConfig parses target configuration JSON and resolves the GitLab token
-// via the auth chain: target config -> GITLAB_TOKEN env -> glab CLI -> glab config file.
+// FromTargetConfig parses target configuration JSON and resolves the GitLab token.
+//
+// A token declared in the target config is used as given: it is the explicit
+// instruction, and falling back from it would silently authenticate as whoever
+// the ambient chain names instead. Only an absent token consults the ambient
+// chain: GITLAB_TOKEN env -> glab CLI -> glab config file.
 func FromTargetConfig(targetConfig []byte) (*Config, error) {
 	cfg := &Config{}
 	if len(targetConfig) > 0 {
@@ -35,7 +48,11 @@ func FromTargetConfig(targetConfig []byte) (*Config, error) {
 		}
 	}
 
-	cfg.Token = resolveToken()
+	if cfg.DeclaredToken != nil {
+		cfg.Token = *cfg.DeclaredToken
+	} else {
+		cfg.Token = resolveToken()
+	}
 
 	return cfg, nil
 }
@@ -43,7 +60,10 @@ func FromTargetConfig(targetConfig []byte) (*Config, error) {
 // Validate checks that all required fields are present.
 func (c *Config) Validate() error {
 	if c.Token == "" {
-		return fmt.Errorf("gitlab token not found; checked: GITLAB_TOKEN env, glab auth token, ~/.config/glab-cli/config.yml")
+		if c.DeclaredToken != nil {
+			return fmt.Errorf("gitlab token in target config is empty; a declared token is used as given and never falls back to the environment")
+		}
+		return fmt.Errorf("gitlab token not found; checked: target config token, GITLAB_TOKEN env, glab auth token, ~/.config/glab-cli/config.yml")
 	}
 	if c.Group == "" {
 		return fmt.Errorf("group is required in target config")
