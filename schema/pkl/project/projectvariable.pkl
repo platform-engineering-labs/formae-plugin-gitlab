@@ -12,8 +12,9 @@ import "../gitlab.pkl"
 
 const type = "GitLab::Project::Variable"
 
-open class VariableResolvable extends formae.Resolvable {
+open class VariableResolvable extends formae.ScalarSecretResolvable {
     hidden type = module.type
+    hidden valueProperty = "value"
 
     hidden key: VariableResolvable = (this) {
         property = "key"
@@ -27,15 +28,20 @@ open class VariableResolvable extends formae.Resolvable {
     type = module.type
     identifier = "key"
 }
-open class Variable extends formae.Resource {
+open class Variable extends formae.Secret {
+    hidden valueProperty = "value"
 
     /// Variable key.
     @gitlab.FieldHint { required = true; createOnly = true }
     key: String
 
-    /// Variable value.
+    /// Variable value. Opaque: GitLab returns it on read, so it is hashed at
+    /// rest and redacted in output whether it arrives as a literal, as
+    /// `formae.value(...).opaque`, or resolved from another resource. Consumers
+    /// reference it with `myVariable.res.secretValue`, which resolves live and
+    /// is stored as a reference rather than a copy of the value.
     @gitlab.FieldHint { required = true }
-    value: String|formae.Resolvable
+    value: String|formae.Resolvable|formae.Value|formae.SecretValue
 
     /// Whether variable is only exposed in protected branches/tags.
     @gitlab.FieldHint {}
