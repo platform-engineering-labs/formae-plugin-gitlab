@@ -1,7 +1,7 @@
 # GitLab Plugin for Formae
 
 [![CI](https://github.com/platform-engineering-labs/formae-plugin-gitlab/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/platform-engineering-labs/formae-plugin-gitlab/actions/workflows/ci.yml)
-[![Nightly](https://github.com/platform-engineering-labs/formae-plugin-gitlab/actions/workflows/nightly.yml/badge.svg?branch=main)](https://github.com/platform-engineering-labs/formae-plugin-gitlab/actions/workflows/nightly.yml)
+[![Monthly](https://github.com/platform-engineering-labs/formae-plugin-gitlab/actions/workflows/monthly.yml/badge.svg?branch=main)](https://github.com/platform-engineering-labs/formae-plugin-gitlab/actions/workflows/monthly.yml)
 
 Formae plugin for managing GitLab CI/CD resources.
 
