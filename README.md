@@ -1,9 +1,35 @@
-# GitLab Plugin for Formae
+# GitLab plugin for formae
 
 [![CI](https://github.com/platform-engineering-labs/formae-plugin-gitlab/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/platform-engineering-labs/formae-plugin-gitlab/actions/workflows/ci.yml)
 [![Monthly](https://github.com/platform-engineering-labs/formae-plugin-gitlab/actions/workflows/monthly.yml/badge.svg?branch=main)](https://github.com/platform-engineering-labs/formae-plugin-gitlab/actions/workflows/monthly.yml)
 
-Formae plugin for managing GitLab CI/CD resources.
+Manages GitLab CI/CD project variables, files, environments and pipelines as Infrastructure As Code with [formae](https://github.com/platform-engineering-labs/formae).
+
+[formae](https://github.com/platform-engineering-labs/formae) · [Hub](https://hub.platform.engineering/platform.engineering/gitlab)
+
+## Install
+
+Requires the formae CLI: see the [quick start](https://docs.formae.ai/documentation/get-started/quickstart).
+
+```bash
+formae plugin install gitlab
+```
+
+Restart the formae agent afterwards so it loads the plugin.
+
+**New project:** with the agent running, `formae project init --include gitlab my-project` creates `my-project` with a `PklProject` that declares the formae and gitlab schema packages, so `import "@gitlab/..."` resolves, and a starter `main.pkl`. Don't run it in an existing project: it overwrites both files.
+
+**Existing project:** add the plugin to `dependencies` in your `PklProject`, with the current version from the [hub page](https://hub.platform.engineering/platform.engineering/gitlab), then run `pkl project resolve`:
+
+```pkl
+["gitlab"] {
+  uri = "package://hub.platform.engineering/plugins/gitlab/schema/pkl/gitlab/gitlab@<version>"
+}
+```
+
+Next: [write your first forma](https://docs.formae.ai/documentation/get-started/write-your-first-forma), then [`formae apply`](https://docs.formae.ai/documentation/reference/cli/apply) (see [apply modes](https://docs.formae.ai/documentation/concepts/apply-modes)).
+
+With an AI coding assistant, use the [formae plugin](https://docs.formae.ai/documentation/guides/ai-coding-assistants) (formerly `formae-mcp`), which can search the hub and fetch plugin examples. The formae documentation is also available as [llms.txt](https://docs.formae.ai/llms.txt).
 
 ## Supported Resources
 
